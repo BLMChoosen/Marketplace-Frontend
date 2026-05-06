@@ -1,0 +1,33 @@
+services:
+  # ─────────────────────────────────────────────
+  # Frontend — Next.js
+  # ─────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: marketplace-frontend
+    restart: unless-stopped
+    env_file:
+      - .env.local
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000 >/dev/null 2>&1 || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - marketplace-net
+
+networks:
+  marketplace-net:
+    name: marketplace-net
+    driver: bridge

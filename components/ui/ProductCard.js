@@ -1,15 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingCart } from 'lucide-react';
+import Image from 'next/image';
+import { ImageOff, ShoppingCart } from 'lucide-react';
 import Button from './Button';
 import useCartStore from '../../lib/cartStore';
+import { resolveImageUrl } from '../../lib/media';
 
 export default function ProductCard({ product }) {
   const addItem = useCartStore((s) => s.addItem);
   const title = product.title || product.name;
-  const imageUrl =
-    product.image_url || `https://picsum.photos/seed/${product.id}/400/300`;
+  const imageUrl = resolveImageUrl(product.image_url);
 
   const handleAdd = (e) => {
     e.preventDefault();
@@ -21,11 +22,19 @@ export default function ProductCard({ product }) {
     <div className="group glass-panel rounded-2xl overflow-hidden flex flex-col interactive-hover relative">
       {/* Product Image */}
       <div className="relative h-48 overflow-hidden bg-secondary">
-        <img
-          src={imageUrl}
-          alt={title}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-        />
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt={title}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-secondary">
+            <ImageOff className="w-10 h-10 text-gray-500" />
+          </div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
         {/* Category Badge */}

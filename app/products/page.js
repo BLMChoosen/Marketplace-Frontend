@@ -1,73 +1,52 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { SlidersHorizontal } from 'lucide-react';
-import api from '../../lib/api';
+import useProductStore from '../../lib/productStore';
 import ProductCard from '../../components/ui/ProductCard';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 
-export default function ProductsListPage() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+function ProductsListContent() {
+  const searchParams = useSearchParams();
+  const storeId = searchParams.get('store_id') || '';
+
+  const products = useProductStore((s) => s.products);
+  const loading = useProductStore((s) => s.loading);
+  const error = useProductStore((s) => s.error);
+  const pagination = useProductStore((s) => s.pagination);
+  const fetchProducts = useProductStore((s) => s.fetchProducts);
+
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [page, setPage] = useState(1);
-  const [pagination, setPagination] = useState({ pages: 1, total: 0 });
   const [useElastic, setUseElastic] = useState(false);
 
-  const fetchProducts = async () => {
-    setLoading(true);
-    try {
-      if (useElastic && query) {
-        const params = { q: query, page, per_page: 12 };
-        if (category) params.category = category;
-        if (minPrice) params.min_price = minPrice;
-        if (maxPrice) params.max_price = maxPrice;
-        const res = await api.get('/search', { params });
-        setProducts(
-          (res.data.results || []).map((r) => ({
-            id: r.id,
-            title: r.title,
-            description: r.description,
-            price: r.price,
-            category: r.category,
-            image_url: r.image_url,
-            store_id: r.store_id,
-          }))
-        );
-        setPagination({
-          pages: Math.max(1, Math.ceil(res.data.total / 12)),
-          total: res.data.total,
-        });
-      } else {
-        const params = { page, per_page: 12 };
-        if (query) params.search = query;
-        if (category) params.category = category;
-        if (minPrice) params.min_price = minPrice;
-        if (maxPrice) params.max_price = maxPrice;
-        const res = await api.get('/products', { params });
-        setProducts(res.data.products || []);
-        setPagination(res.data.pagination || { pages: 1, total: 0 });
-      }
-    } catch (err) {
-      console.error('Failed to load products', err);
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
+  const load = (nextPage = page) => {
+    fetchProducts({
+      page: nextPage,
+      per_page: 12,
+      search: query,
+      category,
+      min_price: minPrice,
+      max_price: maxPrice,
+      store_id: storeId,
+      useElastic,
+    });
   };
 
   useEffect(() => {
-    fetchProducts();
-  }, [page]);
+    load(page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, storeId]);
 
   const handleSearch = (e) => {
     e.preventDefault();
     setPage(1);
-    fetchProducts();
+    load(1);
   };
 
   return (
@@ -81,7 +60,6 @@ export default function ProductsListPage() {
         </p>
       </div>
 
-      {/* Filters */}
       <form onSubmit={handleSearch} className="glass-panel rounded-2xl p-6 mb-10 grid grid-cols-1 md:grid-cols-5 gap-4">
         <div className="md:col-span-2">
           <Input
@@ -118,7 +96,7 @@ export default function ProductsListPage() {
               className="w-4 h-4 accent-primary"
             />
             <SlidersHorizontal className="w-4 h-4" />
-            Busca avançada (Elasticsearch)
+            Busca avançada
           </label>
           <Button type="submit" variant="primary" size="md">
             Buscar
@@ -131,6 +109,11 @@ export default function ProductsListPage() {
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <div key={i} className="h-80 rounded-2xl bg-white/5 animate-pulse" />
           ))}
+        </div>
+      ) : error ? (
+        <div className="glass-panel rounded-2xl p-16 text-center">
+          <p className="text-lg text-white font-medium mb-1">Falha ao carregar produtos</p>
+          <p className="text-gray-400">{error}</p>
         </div>
       ) : products.length === 0 ? (
         <div className="glass-panel rounded-2xl p-16 text-center">
@@ -145,7 +128,6 @@ export default function ProductsListPage() {
             ))}
           </div>
 
-          {/* Pagination */}
           {pagination.pages > 1 && (
             <div className="mt-10 flex items-center justify-center gap-2">
               <Button
@@ -172,5 +154,13 @@ export default function ProductsListPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function ProductsListPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-12 text-white">Carregando produtos...</div>}>
+      <ProductsListContent />
+    </Suspense>
   );
 }

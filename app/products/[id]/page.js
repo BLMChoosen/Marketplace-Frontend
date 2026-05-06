@@ -1,34 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ShoppingCart, Star, ShieldCheck, Truck } from 'lucide-react';
-import api from '../../../lib/api';
+import Image from 'next/image';
+import { ImageOff, ShoppingCart, Star, ShieldCheck, Truck } from 'lucide-react';
 import Button from '../../../components/ui/Button';
 import useCartStore from '../../../lib/cartStore';
+import useProductStore from '../../../lib/productStore';
+import { resolveImageUrl } from '../../../lib/media';
 
 export default function ProductDetails() {
   const { id } = useParams();
   const router = useRouter();
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const product = useProductStore((s) => s.selectedProduct);
+  const loading = useProductStore((s) => s.loading);
+  const error = useProductStore((s) => s.error);
+  const fetchProduct = useProductStore((s) => s.fetchProduct);
   const addItem = useCartStore((s) => s.addItem);
 
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const res = await api.get(`/products/${id}`);
-        setProduct(res.data.product);
-      } catch (error) {
-        console.error('Failed to fetch product', error);
-        setProduct(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id) fetchProduct();
-  }, [id]);
+    if (id) fetchProduct(id);
+  }, [id, fetchProduct]);
 
   if (loading) {
     return (
@@ -48,14 +40,13 @@ export default function ProductDetails() {
   if (!product) {
     return (
       <div className="container mx-auto px-4 py-12 text-center text-white">
-        Produto não encontrado.
+        {error || 'Produto não encontrado.'}
       </div>
     );
   }
 
   const title = product.title || product.name;
-  const imageUrl =
-    product.image_url || `https://picsum.photos/seed/${product.id}/800/600`;
+  const imageUrl = resolveImageUrl(product.image_url);
 
   const handleAddToCart = () => {
     addItem(product, 1);
@@ -72,11 +63,19 @@ export default function ProductDetails() {
         {/* Product Image Gallery */}
         <div className="w-full md:w-1/2 flex flex-col gap-4">
           <div className="glass-panel rounded-3xl overflow-hidden aspect-[4/3] flex items-center justify-center relative group">
-            <img
-              src={imageUrl}
-              alt={title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-            />
+            {imageUrl ? (
+              <Image
+                src={imageUrl}
+                alt={title}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-secondary">
+                <ImageOff className="w-16 h-16 text-gray-500" />
+              </div>
+            )}
           </div>
         </div>
 
@@ -93,13 +92,17 @@ export default function ProductDetails() {
           </h1>
 
           <div className="flex items-center gap-4 mb-8">
-            <div className="flex items-center gap-1 text-yellow-400">
-              <Star className="w-5 h-5 fill-current" />
-              <span className="font-bold text-white ml-1">
-                {product.store?.rating || '4.5'}
-              </span>
-            </div>
-            <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
+            {product.store?.rating && (
+              <>
+                <div className="flex items-center gap-1 text-yellow-400">
+                  <Star className="w-5 h-5 fill-current" />
+                  <span className="font-bold text-white ml-1">
+                    {product.store.rating}
+                  </span>
+                </div>
+                <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
+              </>
+            )}
             <span className="text-gray-400 font-medium">
               Vendido por{' '}
               <span className="text-white border-b border-white/20 pb-0.5">
@@ -176,7 +179,7 @@ export default function ProductDetails() {
               <div>
                 <h4 className="font-medium text-white mb-1">Frete Expresso</h4>
                 <p className="text-sm text-gray-400 leading-tight">
-                  Entrega rápida para todo o Brasil.
+                  Frete calculado com dados do pedido no checkout.
                 </p>
               </div>
             </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import api from '../lib/api';
 import { useRouter } from 'next/navigation';
 
@@ -10,6 +10,13 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  const logout = useCallback(() => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    setUser(null);
+    router.push('/login');
+  }, [router]);
 
   useEffect(() => {
     // Check if user is logged in
@@ -28,7 +35,7 @@ export function AuthProvider({ children }) {
     };
 
     checkAuth();
-  }, []);
+  }, [logout]);
 
   const login = async (email, password) => {
     try {
@@ -54,13 +61,6 @@ export function AuthProvider({ children }) {
     } catch (error) {
       return { success: false, error: error.response?.data?.error || "Registration failed" };
     }
-  };
-
-  const logout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    setUser(null);
-    router.push('/login');
   };
 
   return (

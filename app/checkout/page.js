@@ -90,24 +90,28 @@ function CheckoutInner() {
   const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
-    const raw = sessionStorage.getItem('checkout_data');
-    if (!raw) {
-      setErrorMsg('Sessão de pagamento expirada. Volte ao carrinho.');
+    const timer = window.setTimeout(() => {
+      const raw = sessionStorage.getItem('checkout_data');
+      if (!raw) {
+        setErrorMsg('Sessão de pagamento expirada. Volte ao carrinho.');
+        setLoading(false);
+        return;
+      }
+
+      const data = JSON.parse(raw);
+
+      if (!data.client_secret || !data.publishable_key || !data.order) {
+        setErrorMsg('Dados de pagamento inválidos. Volte ao carrinho.');
+        setLoading(false);
+        return;
+      }
+
+      setCheckoutData(data);
+      setStripePromise(loadStripe(data.publishable_key));
       setLoading(false);
-      return;
-    }
+    }, 0);
 
-    const data = JSON.parse(raw);
-
-    if (!data.client_secret || !data.publishable_key || !data.order) {
-      setErrorMsg('Dados de pagamento inválidos. Volte ao carrinho.');
-      setLoading(false);
-      return;
-    }
-
-    setCheckoutData(data);
-    setStripePromise(loadStripe(data.publishable_key));
-    setLoading(false);
+    return () => window.clearTimeout(timer);
   }, []);
 
   if (loading) {

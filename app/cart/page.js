@@ -1,14 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Trash2, Minus, Plus, ShoppingCart } from 'lucide-react';
+import Image from 'next/image';
+import { ImageOff, Trash2, Minus, Plus, ShoppingCart } from 'lucide-react';
 import useCartStore from '../../lib/cartStore';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../lib/api';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
+import { resolveImageUrl } from '../../lib/media';
 
 export default function CartPage() {
   const items = useCartStore((s) => s.items);
@@ -20,12 +22,14 @@ export default function CartPage() {
 
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [hydrated, setHydrated] = useState(false);
   const [shippingAddress, setShippingAddress] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-
-  useEffect(() => { setHydrated(true); }, []);
+  const hydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
   const handleProceedToCheckout = async () => {
     if (!user) { router.push('/login'); return; }
@@ -80,12 +84,20 @@ export default function CartPage() {
           <div className="lg:col-span-2 space-y-4">
             {items.map((item) => (
               <div key={item.id} className="glass-panel rounded-2xl p-4 flex items-center gap-4">
-                <div className="w-20 h-20 rounded-xl bg-secondary overflow-hidden shrink-0">
-                  <img
-                    src={item.image_url || `https://picsum.photos/seed/${item.id}/200/200`}
-                    alt={item.title}
-                    className="w-full h-full object-cover"
-                  />
+                <div className="relative w-20 h-20 rounded-xl bg-secondary overflow-hidden shrink-0">
+                  {resolveImageUrl(item.image_url) ? (
+                    <Image
+                      src={resolveImageUrl(item.image_url)}
+                      alt={item.title}
+                      fill
+                      sizes="80px"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <ImageOff className="w-6 h-6 text-gray-500" />
+                    </div>
+                  )}
                 </div>
                 <div className="flex-grow min-w-0">
                   <h3 className="font-medium text-white truncate">{item.title}</h3>

@@ -5,21 +5,12 @@ import { useAuth } from '../../context/AuthContext';
 import useCartStore from '../../lib/cartStore';
 import { ShoppingCart, User, LogOut, Package, MessageCircle } from 'lucide-react';
 import Button from './Button';
-import { useEffect, useState } from 'react';
 
 export default function Navbar() {
   const { user, logout, loading } = useAuth();
-  const totalItems = useCartStore((s) => s.totalItems);
-  const [cartCount, setCartCount] = useState(0);
-
-  // Avoid SSR/CSR mismatch from persisted store
-  useEffect(() => {
-    setCartCount(totalItems());
-    const unsub = useCartStore.subscribe((state) => {
-      setCartCount(state.items.reduce((sum, i) => sum + i.quantity, 0));
-    });
-    return unsub;
-  }, [totalItems]);
+  const cartCount = useCartStore((s) =>
+    s.items.reduce((sum, item) => sum + item.quantity, 0)
+  );
 
   return (
     <header className="sticky top-0 z-50 w-full glass border-b-0 border-white/5">

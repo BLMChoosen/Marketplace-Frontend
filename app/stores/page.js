@@ -1,28 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { Store as StoreIcon, ArrowRight } from 'lucide-react';
-import api from '../../lib/api';
+import useProductStore from '../../lib/productStore';
 
 export default function StoresListPage() {
-  const [stores, setStores] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const stores = useProductStore((s) => s.stores);
+  const loading = useProductStore((s) => s.loading);
+  const error = useProductStore((s) => s.error);
+  const fetchStores = useProductStore((s) => s.fetchStores);
 
   useEffect(() => {
-    const fetchStores = async () => {
-      try {
-        const res = await api.get('/stores');
-        setStores(res.data.stores || []);
-      } catch (err) {
-        console.error('Failed to load stores', err);
-        setStores([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStores();
-  }, []);
+    fetchStores({ page: 1, per_page: 24 });
+  }, [fetchStores]);
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -38,6 +29,12 @@ export default function StoresListPage() {
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="h-48 rounded-2xl bg-white/5 animate-pulse" />
           ))}
+        </div>
+      ) : error ? (
+        <div className="glass-panel rounded-2xl p-16 text-center">
+          <StoreIcon className="w-12 h-12 text-gray-500 mx-auto mb-3" />
+          <p className="text-lg text-white font-medium mb-1">Falha ao carregar lojas</p>
+          <p className="text-gray-400">{error}</p>
         </div>
       ) : stores.length === 0 ? (
         <div className="glass-panel rounded-2xl p-16 text-center">

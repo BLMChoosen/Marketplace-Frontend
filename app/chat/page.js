@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Send, MessageCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -9,7 +9,7 @@ import { getSocket, disconnectSocket } from '../../lib/socket';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 
-export default function ChatPage() {
+function ChatContent() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const params = useSearchParams();
@@ -31,18 +31,22 @@ export default function ChatPage() {
   }, [user, loading, router]);
 
   // Load conversations
-  const loadConversations = async () => {
+  const loadConversations = useCallback(async () => {
     try {
       const res = await api.get('/chat/conversations');
       setConversations(res.data.conversations || []);
     } catch (err) {
       console.error('Failed to load conversations', err);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    if (user) loadConversations();
-  }, [user]);
+    if (!user) return undefined;
+    const timer = window.setTimeout(() => {
+      loadConversations();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [user, loadConversations]);
 
   // Connect socket
   useEffect(() => {
@@ -90,8 +94,7 @@ export default function ChatPage() {
       socket.off('disconnect');
       socket.off('connected');
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, activePeer]);
+  }, [user, activePeer, loadConversations]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -273,5 +276,13 @@ export default function ChatPage() {
         </section>
       </div>
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-12 text-white">Carregando chat...</div>}>
+      <ChatContent />
+    </Suspense>
   );
 }
