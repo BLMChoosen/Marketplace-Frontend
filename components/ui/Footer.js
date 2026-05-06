@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import BrandMark from './BrandMark';
+import { Moon } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -7,7 +7,9 @@ export default function Footer() {
       <div className="bm-container py-10">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
           <div className="flex items-center gap-3">
-            <BrandMark size="sm" alt="" className="shadow-[0_0_18px_-6px_rgba(163,0,21,0.6)]" />
+            <div className="w-9 h-9 rounded-md bg-black border border-[#A30015] flex items-center justify-center text-[#A30015] shadow-[0_0_18px_-6px_rgba(163,0,21,0.6)]">
+              <Moon className="w-4 h-4 fill-[#A30015] stroke-[#A30015]" />
+            </div>
             <div className="flex flex-col leading-none">
               <span className="font-heading font-black text-lg text-white">
                 Bloodmoon
@@ -25,9 +27,14 @@ export default function Footer() {
             <Link href="/cart" className="hover:text-white transition-colors">Carrinho</Link>
           </nav>
 
-          <div className="text-xs text-[rgb(120,120,125)]">
-            © {new Date().getFullYear()} Bloodmoon Marketplace
-          </div>
+          <Link
+            href="https://agency.bloodmoonbr.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-[rgb(120,120,125)] hover:text-white transition-colors"
+          >
+            © 2026 Bloodmoon Agency
+          </Link>
         </div>
       </div>
     </footer>

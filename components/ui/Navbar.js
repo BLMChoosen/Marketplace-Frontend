@@ -3,10 +3,9 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { Menu, X, ShoppingCart, User, LogOut, Package, MessageCircle } from 'lucide-react';
+import { Menu, X, ShoppingCart, User, LogOut, Package, MessageCircle, Moon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import useCartStore from '../../lib/cartStore';
-import BrandMark from './BrandMark';
 import Button from './Button';
 
 const navLinks = [
@@ -47,7 +46,9 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 w-full bg-black/90 backdrop-blur-xl border-b border-[rgba(163,0,21,0.22)]">
       <div className="bm-container h-18 flex items-center justify-between gap-4">
         <Link href="/" className="flex items-center gap-3 group shrink-0" onClick={() => setOpen(false)}>
-          <BrandMark alt="" priority className="group-hover:shadow-[0_0_28px_-4px_rgba(163,0,21,0.9)] transition-all" />
+          <div className="relative w-10 h-10 rounded-md bg-black border border-[#A30015] flex items-center justify-center text-[#A30015] shadow-[0_0_22px_-6px_rgba(163,0,21,0.7)] group-hover:shadow-[0_0_28px_-4px_rgba(163,0,21,0.9)] transition-all">
+            <Moon className="w-5 h-5 fill-[#A30015] stroke-[#A30015]" />
+          </div>
           <div className="flex flex-col leading-none">
             <span className="font-heading font-black text-xl text-white">
               Bloodmoon

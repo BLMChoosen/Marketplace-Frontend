@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { Moon } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import Input from '../../../components/ui/Input';
 import Button from '../../../components/ui/Button';
-import BrandMark from '../../../components/ui/BrandMark';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -32,7 +32,9 @@ export default function Login() {
 
       <div className="w-full max-w-md bm-panel p-8 animate-fade-in-up relative z-10 bg-[rgb(17,17,20)]">
         <div className="text-center mb-8">
-          <BrandMark size="lg" className="mb-5" />
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-md bg-black border border-[#A30015] text-[#A30015] mb-5 shadow-[0_0_22px_-6px_rgba(163,0,21,0.7)]">
+            <Moon className="w-5 h-5 fill-[#A30015] stroke-[#A30015]" />
+          </div>
           <h1 className="text-3xl font-black font-heading text-white mb-2">Bem-vindo de volta</h1>
           <p className="text-[rgb(161,161,170)] text-sm">Entre na sua conta Bloodmoon</p>
         </div>

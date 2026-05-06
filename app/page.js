@@ -3,8 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Flame, ImageOff, Shield, ShoppingBag, Store, Zap } from 'lucide-react';
-import BrandMark from '../components/ui/BrandMark';
+import { ArrowRight, Flame, ImageOff, Moon, Shield, ShoppingBag, Store, Zap } from 'lucide-react';
 import Button from '../components/ui/Button';
 import ProductCard from '../components/ui/ProductCard';
 import useProductStore from '../lib/productStore';
@@ -84,7 +83,9 @@ export default function Home() {
                 <p className="text-[10px] uppercase text-[#A30015] font-bold mb-1">Vitrine Bloodmoon</p>
                 <h2 className="text-2xl font-black font-heading text-white">Produtos em destaque</h2>
               </div>
-              <BrandMark alt="" />
+              <div className="w-10 h-10 rounded-md bg-black border border-[#A30015] flex items-center justify-center text-[#A30015]">
+                <Moon className="w-5 h-5 fill-[#A30015] stroke-[#A30015]" />
+              </div>
             </div>
 
             {loading ? (

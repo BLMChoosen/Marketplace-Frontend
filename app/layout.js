@@ -3,8 +3,11 @@ import { AuthProvider } from '../context/AuthContext';
 import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+const socialImage = siteUrl ? { images: ['/logo.png'] } : {};
+
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  ...(siteUrl ? { metadataBase: new URL(siteUrl) } : {}),
   title: 'Bloodmoon Marketplace',
   description: 'Bloodmoon Marketplace — comércio digital com identidade. Sombrio, intenso, sem concessões.',
   icons: {
@@ -15,7 +18,7 @@ export const metadata = {
   openGraph: {
     title: 'Bloodmoon Marketplace',
     description: 'Comércio digital com identidade dark, intensa e premium.',
-    images: ['/logo.png'],
+    ...socialImage,
   },
 };
 
