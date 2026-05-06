@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '../../../context/AuthContext';
 import Input from '../../../components/ui/Input';
 import Button from '../../../components/ui/Button';
+import BrandMark from '../../../components/ui/BrandMark';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -17,7 +18,7 @@ export default function Login() {
     e.preventDefault();
     setError('');
     setLoading(true);
-    
+
     const res = await login(email, password);
     if (!res.success) {
       setError(res.error);
@@ -26,40 +27,43 @@ export default function Login() {
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center p-4">
-      <div className="w-full max-w-md glass-panel p-8 rounded-2xl animate-fade-in-up">
+    <div className="bm-page flex-1 flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute inset-0 bm-grid-bg opacity-50 pointer-events-none" />
+
+      <div className="w-full max-w-md bm-panel p-8 animate-fade-in-up relative z-10 bg-[rgb(17,17,20)]">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold font-heading text-white mb-2">Bem-vindo de volta</h1>
-          <p className="text-gray-400">Faça login para acessar sua conta</p>
+          <BrandMark size="lg" className="mb-5" />
+          <h1 className="text-3xl font-black font-heading text-white mb-2">Bem-vindo de volta</h1>
+          <p className="text-[rgb(161,161,170)] text-sm">Entre na sua conta Bloodmoon</p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
+          <div className="mb-6 p-4 bm-danger text-sm text-center">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          <Input 
-            label="E-mail" 
-            type="email" 
+          <Input
+            label="E-mail"
+            type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="seu@email.com"
             required
           />
-          
+
           <div className="space-y-1">
-            <Input 
-              label="Senha" 
-              type="password" 
+            <Input
+              label="Senha"
+              type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
             />
             <div className="flex justify-end">
-              <Link href="/forgot-password" className="text-xs text-primary hover:text-primary-hover transition-colors">
+              <Link href="/forgot-password" className="text-xs text-[#A30015] hover:text-white transition-colors">
                 Esqueceu a senha?
               </Link>
             </div>
@@ -70,9 +74,9 @@ export default function Login() {
           </Button>
         </form>
 
-        <div className="mt-8 text-center text-sm text-gray-400">
+        <div className="mt-8 text-center text-sm text-[rgb(161,161,170)]">
           Não tem uma conta?{' '}
-          <Link href="/register" className="text-primary hover:text-primary-hover font-medium transition-colors">
+          <Link href="/register" className="text-[#A30015] hover:text-white font-bold transition-colors">
             Cadastre-se
           </Link>
         </div>

@@ -43,7 +43,6 @@ export default function CartPage() {
         items: toCheckoutPayload(),
         shipping_address: shippingAddress,
       });
-      // Store data for checkout page
       sessionStorage.setItem('checkout_data', JSON.stringify({
         client_secret: res.data.client_secret,
         publishable_key: res.data.publishable_key,
@@ -60,20 +59,23 @@ export default function CartPage() {
   };
 
   if (!hydrated) {
-    return <div className="container mx-auto px-4 py-12 text-white">Carregando carrinho...</div>;
+    return <div className="bm-container py-12 text-white">Carregando carrinho...</div>;
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <h1 className="text-3xl md:text-4xl font-bold font-heading text-white mb-8">
-        Seu Carrinho
-      </h1>
+    <div className="bm-page bm-container py-16">
+      <div className="mb-10">
+        <div className="bm-kicker mb-3">Carrinho</div>
+        <h1 className="text-4xl md:text-5xl font-black font-heading text-white">
+          Sua coleção
+        </h1>
+      </div>
 
       {items.length === 0 ? (
-        <div className="glass-panel rounded-2xl p-16 text-center">
-          <ShoppingCart className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+        <div className="bm-empty p-16">
+          <ShoppingCart className="w-12 h-12 text-[#A30015] mx-auto mb-4" />
           <p className="text-lg text-white font-medium mb-1">Seu carrinho está vazio</p>
-          <p className="text-gray-400 mb-6">Adicione produtos para continuar.</p>
+          <p className="text-[rgb(161,161,170)] mb-6">Adicione produtos para continuar.</p>
           <Link href="/products">
             <Button variant="primary" size="md">Explorar produtos</Button>
           </Link>
@@ -83,8 +85,8 @@ export default function CartPage() {
           {/* Items */}
           <div className="lg:col-span-2 space-y-4">
             {items.map((item) => (
-              <div key={item.id} className="glass-panel rounded-2xl p-4 flex items-center gap-4">
-                <div className="relative w-20 h-20 rounded-xl bg-secondary overflow-hidden shrink-0">
+              <div key={item.id} className="bm-card p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+                <div className="relative w-20 h-20 rounded-md bg-[rgb(20,20,19)] overflow-hidden shrink-0 border border-[rgba(255,255,255,0.04)]">
                   {resolveImageUrl(item.image_url) ? (
                     <Image
                       src={resolveImageUrl(item.image_url)}
@@ -95,52 +97,52 @@ export default function CartPage() {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <ImageOff className="w-6 h-6 text-gray-500" />
+                      <ImageOff className="w-6 h-6 text-[rgb(80,80,85)]" />
                     </div>
                   )}
                 </div>
-                <div className="flex-grow min-w-0">
+                <div className="flex-grow min-w-0 w-full">
                   <h3 className="font-medium text-white truncate">{item.title}</h3>
-                  <p className="text-sm text-gray-400 mt-0.5">R$ {item.price.toFixed(2)} cada</p>
+                  <p className="text-sm text-[rgb(161,161,170)] mt-0.5">R$ {item.price.toFixed(2)} cada</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-white flex items-center justify-center">
+                <div className="flex items-center gap-2 self-start sm:self-center">
+                  <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-8 h-8 rounded-md bg-black border border-[rgba(255,255,255,0.06)] hover:border-[#A30015] hover:text-[#A30015] text-white flex items-center justify-center transition-colors">
                     <Minus className="w-4 h-4" />
                   </button>
-                  <span className="text-white font-medium w-6 text-center">{item.quantity}</span>
-                  <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-white flex items-center justify-center">
+                  <span className="text-white font-bold w-6 text-center">{item.quantity}</span>
+                  <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="w-8 h-8 rounded-md bg-black border border-[rgba(255,255,255,0.06)] hover:border-[#A30015] hover:text-[#A30015] text-white flex items-center justify-center transition-colors">
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
-                <div className="text-right shrink-0">
-                  <p className="text-white font-bold">R$ {(item.price * item.quantity).toFixed(2)}</p>
-                  <button onClick={() => removeItem(item.id)} className="text-red-400 hover:text-red-300 mt-1">
+                <div className="text-left sm:text-right shrink-0">
+                  <p className="text-white font-black">R$ {(item.price * item.quantity).toFixed(2)}</p>
+                  <button onClick={() => removeItem(item.id)} className="text-[#A30015] hover:text-white transition-colors mt-1">
                     <Trash2 className="w-4 h-4 inline" />
                   </button>
                 </div>
               </div>
             ))}
-            <button onClick={clear} className="text-sm text-gray-400 hover:text-red-400 transition-colors">
+            <button onClick={clear} className="text-sm text-[rgb(161,161,170)] hover:text-[#A30015] transition-colors uppercase">
               Limpar carrinho
             </button>
           </div>
 
           {/* Summary */}
-          <div className="glass-panel rounded-2xl p-6 h-fit sticky top-24">
-            <h2 className="text-xl font-bold text-white mb-6">Resumo</h2>
+          <div className="bm-panel p-6 h-fit sticky top-24">
+            <h2 className="text-xl font-black font-heading text-white mb-6 uppercase">Resumo</h2>
 
-            <div className="space-y-3 mb-6 border-b border-white/10 pb-6">
+            <div className="space-y-3 mb-6 border-b border-[rgba(255,255,255,0.06)] pb-6">
               {items.map((item) => (
-                <div key={item.id} className="flex justify-between text-sm text-gray-400">
-                  <span className="truncate mr-2">{item.title} x{item.quantity}</span>
-                  <span className="shrink-0">R$ {(item.price * item.quantity).toFixed(2)}</span>
+                <div key={item.id} className="flex justify-between text-sm text-[rgb(161,161,170)]">
+                  <span className="truncate mr-2">{item.title} × {item.quantity}</span>
+                  <span className="shrink-0 text-white">R$ {(item.price * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
             </div>
 
-            <div className="flex justify-between text-white font-bold text-lg mb-6">
-              <span>Total</span>
-              <span>R$ {totalPrice().toFixed(2)}</span>
+            <div className="flex justify-between text-white font-black text-lg mb-6">
+              <span className="uppercase">Total</span>
+              <span className="text-[#A30015]">R$ {totalPrice().toFixed(2)}</span>
             </div>
 
             <div className="mb-4">
@@ -153,7 +155,7 @@ export default function CartPage() {
             </div>
 
             {errorMsg && (
-              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg">
+              <div className="mb-4 p-3 bm-danger text-sm">
                 {errorMsg}
               </div>
             )}
@@ -166,11 +168,11 @@ export default function CartPage() {
               isLoading={submitting}
               disabled={authLoading}
             >
-              {user ? 'Ir para Pagamento' : 'Fazer login para comprar'}
+              {user ? 'Ir para pagamento' : 'Fazer login para comprar'}
             </Button>
 
-            <p className="text-xs text-gray-500 text-center mt-3">
-              Pagamento seguro via Stripe
+            <p className="text-[10px] text-[rgb(120,120,125)] text-center mt-3 uppercase">
+              Pagamento seguro · Stripe
             </p>
           </div>
         </div>

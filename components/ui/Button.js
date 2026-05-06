@@ -1,32 +1,43 @@
-export default function Button({ 
-  children, 
-  variant = 'primary', 
-  className = '', 
+export default function Button({
+  children,
+  variant = 'primary',
+  size = 'md',
+  type = 'button',
+  className = '',
   isLoading = false,
-  ...props 
+  ...props
 }) {
-  const baseStyles = "relative inline-flex items-center justify-center font-medium transition-all duration-300 rounded-lg focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden";
-  
+  const baseStyles =
+    'relative inline-flex items-center justify-center font-bold transition-all duration-300 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A30015]/60 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden select-none';
+
   const variants = {
-    primary: "bg-primary hover:bg-primary-hover text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5",
-    secondary: "bg-secondary hover:bg-secondary-hover text-white border border-white/10 hover:border-white/20",
-    accent: "bg-accent hover:bg-accent-hover text-white shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:-translate-y-0.5",
-    ghost: "bg-transparent hover:bg-white/5 text-gray-300 hover:text-white"
+    primary:
+      'bg-[#A30015] hover:bg-[rgb(122,0,16)] text-white shadow-[0_10px_30px_-12px_rgba(163,0,21,0.7)] hover:shadow-[0_14px_40px_-12px_rgba(163,0,21,0.9)] hover:-translate-y-0.5 border border-[rgba(163,0,21,0.6)]',
+    secondary:
+      'bg-[rgb(20,20,19)] hover:bg-[rgb(34,34,38)] text-white border border-[rgba(255,255,255,0.08)] hover:border-[rgba(163,0,21,0.5)]',
+    accent:
+      'bg-[rgb(122,0,16)] hover:bg-[#A30015] text-white shadow-[0_10px_30px_-12px_rgba(163,0,21,0.7)] hover:-translate-y-0.5',
+    ghost:
+      'bg-transparent hover:bg-[rgba(163,0,21,0.08)] text-[rgb(161,161,170)] hover:text-white border border-transparent hover:border-[rgba(163,0,21,0.3)]',
+    outline:
+      'bg-transparent text-white border border-[rgba(163,0,21,0.6)] hover:bg-[#A30015] hover:border-[#A30015]',
   };
 
   const sizes = {
-    sm: "text-sm px-4 py-2",
-    md: "text-base px-6 py-3",
-    lg: "text-lg px-8 py-4"
+    sm: 'text-sm px-4 py-2 min-h-9',
+    md: 'text-base px-6 py-3 min-h-11',
+    lg: 'text-lg px-8 py-4 min-h-[3.25rem]',
   };
 
-  const sizeClass = sizes[props.size || 'md'];
-  const variantClass = variants[variant];
+  const sizeClass = sizes[size] || sizes.md;
+  const variantClass = variants[variant] || variants.primary;
 
   return (
-    <button 
-      className={`${baseStyles} ${variantClass} ${sizeClass} ${className}`} 
+    <button
+      type={type}
+      className={`${baseStyles} ${variantClass} ${sizeClass} ${className}`}
       disabled={isLoading || props.disabled}
+      aria-busy={isLoading || undefined}
       {...props}
     >
       {isLoading ? (
@@ -38,12 +49,7 @@ export default function Button({
           Processando...
         </span>
       ) : (
-        <span className="relative z-10">{children}</span>
-      )}
-      
-      {/* Ripple/Shine effect on hover */}
-      {!isLoading && !props.disabled && (
-        <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:animate-shimmer" />
+        <span className="relative z-10 inline-flex items-center justify-center gap-2">{children}</span>
       )}
     </button>
   );

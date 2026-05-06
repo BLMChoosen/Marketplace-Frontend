@@ -18,17 +18,14 @@ function SuccessInner() {
   useEffect(() => {
     if (!orderId) { router.push('/'); return; }
 
-    // Clear checkout session data
     sessionStorage.removeItem('checkout_data');
 
     const verify = async () => {
       try {
-        // Verify payment with backend (confirms intent status)
         const res = await api.post(`/payments/verify/${orderId}`);
         setOrder(res.data.order);
       } catch (err) {
         console.error('Verify failed', err);
-        // Fallback: just show order
         try {
           const res = await api.get(`/orders/${orderId}`);
           setOrder(res.data.order);
@@ -43,7 +40,7 @@ function SuccessInner() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-24 text-center text-white">
+      <div className="bm-container py-24 text-center text-white">
         Confirmando pagamento...
       </div>
     );
@@ -52,39 +49,47 @@ function SuccessInner() {
   const isPaid = order?.status === 'paid' || order?.status === 'shipped' || order?.status === 'delivered';
 
   return (
-    <div className="container mx-auto px-4 py-16 flex flex-col items-center text-center max-w-lg">
-      <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 ${isPaid ? 'bg-green-400/10' : 'bg-yellow-400/10'}`}>
+    <div className="bm-page w-full max-w-lg mx-auto px-4 py-20 flex flex-col items-center text-center relative">
+      <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 border ${
+        isPaid
+          ? 'bg-[rgba(163,0,21,0.12)] border-[#A30015] shadow-[0_0_30px_-6px_rgba(163,0,21,0.7)]'
+          : 'bg-[rgb(17,17,20)] border-[rgba(255,255,255,0.1)]'
+      }`}>
         {isPaid
-          ? <CheckCircle2 className="w-12 h-12 text-green-400" />
-          : <Package className="w-12 h-12 text-yellow-400" />
+          ? <CheckCircle2 className="w-10 h-10 text-[#A30015]" />
+          : <Package className="w-10 h-10 text-[rgb(161,161,170)]" />
         }
       </div>
 
-      <h1 className="text-3xl font-bold font-heading text-white mb-3">
-        {isPaid ? 'Pagamento Confirmado!' : 'Pedido Recebido'}
+      <div className="mb-3">
+        <span className="bm-kicker">{isPaid ? 'Confirmado' : 'Aguardando'}</span>
+      </div>
+
+      <h1 className="text-3xl md:text-4xl font-black font-heading text-white mb-3">
+        {isPaid ? 'Pagamento confirmado' : 'Pedido recebido'}
       </h1>
-      <p className="text-gray-400 mb-8">
+      <p className="text-[rgb(161,161,170)] mb-8">
         {isPaid
-          ? `Seu pedido #${order?.id} foi pago com sucesso. Você receberá atualizações por e-mail.`
+          ? `Seu pedido #${order?.id} foi pago com sucesso. Atualizações chegarão por e-mail.`
           : `Seu pedido #${order?.id} foi criado. Aguardando confirmação do pagamento.`
         }
       </p>
 
       {order && (
-        <div className="w-full glass-panel rounded-2xl p-6 mb-8 text-left space-y-3">
+        <div className="w-full bm-panel p-6 mb-8 text-left space-y-3">
           <div className="flex justify-between">
-            <span className="text-gray-400">Pedido</span>
+            <span className="text-[rgb(161,161,170)] uppercase text-[10px] font-bold">Pedido</span>
             <span className="text-white font-medium">#{order.id}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-400">Status</span>
-            <span className={`font-medium capitalize ${isPaid ? 'text-green-400' : 'text-yellow-400'}`}>
+            <span className="text-[rgb(161,161,170)] uppercase text-[10px] font-bold">Status</span>
+            <span className={`font-bold capitalize ${isPaid ? 'text-[#A30015]' : 'text-white'}`}>
               {order.status}
             </span>
           </div>
-          <div className="flex justify-between border-t border-white/10 pt-3">
-            <span className="text-gray-400">Total pago</span>
-            <span className="text-white font-bold text-lg">
+          <div className="flex justify-between border-t border-[rgba(255,255,255,0.06)] pt-3">
+            <span className="text-[rgb(161,161,170)] uppercase text-[10px] font-bold">Total pago</span>
+            <span className="text-white font-black text-lg">
               R$ {parseFloat(order.total_amount).toFixed(2)}
             </span>
           </div>
@@ -94,12 +99,12 @@ function SuccessInner() {
       <div className="flex flex-col sm:flex-row gap-4 w-full">
         <Link href="/products" className="flex-1">
           <Button variant="secondary" size="lg" className="w-full">
-            Continuar Comprando
+            Continuar comprando
           </Button>
         </Link>
         <Link href="/dashboard" className="flex-1">
-          <Button variant="primary" size="lg" className="w-full gap-2">
-            Ver Meus Pedidos <ArrowRight className="w-4 h-4" />
+          <Button variant="primary" size="lg" className="w-full">
+            Meus pedidos <ArrowRight className="w-4 h-4" />
           </Button>
         </Link>
       </div>

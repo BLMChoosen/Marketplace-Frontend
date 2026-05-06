@@ -25,12 +25,10 @@ function ChatContent() {
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
-  // Auth gate
   useEffect(() => {
     if (!loading && !user) router.push('/login');
   }, [user, loading, router]);
 
-  // Load conversations
   const loadConversations = useCallback(async () => {
     try {
       const res = await api.get('/chat/conversations');
@@ -48,7 +46,6 @@ function ChatContent() {
     return () => window.clearTimeout(timer);
   }, [user, loadConversations]);
 
-  // Connect socket
   useEffect(() => {
     if (!user) return;
     const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
@@ -96,19 +93,16 @@ function ChatContent() {
     };
   }, [user, activePeer, loadConversations]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => disconnectSocket();
   }, []);
 
-  // Load conversation history when peer changes
   useEffect(() => {
     if (!activePeer || !user) return;
 
     const loadHistory = async () => {
       try {
         const res = await api.get(`/chat/conversation/${activePeer}`);
-        // backend returns newest-first; reverse for chat UI
         setMessages([...(res.data.messages || [])].reverse());
       } catch (err) {
         console.error('Failed to load conversation', err);
@@ -117,7 +111,6 @@ function ChatContent() {
     loadHistory();
   }, [activePeer, user]);
 
-  // Auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -142,27 +135,26 @@ function ChatContent() {
   };
 
   if (loading || !user) {
-    return <div className="container mx-auto px-4 py-12 text-white">Carregando...</div>;
+    return <div className="bm-container py-12 text-white">Carregando...</div>;
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 h-[calc(100vh-10rem)]">
-      <div className="flex h-full glass-panel rounded-2xl overflow-hidden">
-        {/* Sidebar — conversations */}
-        <aside className="w-72 border-r border-white/10 flex flex-col">
-          <div className="p-4 border-b border-white/10 flex items-center justify-between">
-            <h2 className="font-heading font-bold text-white">Conversas</h2>
+    <div className="bm-page bm-container py-8 min-h-[calc(100vh-10rem)]">
+      <div className="flex flex-col lg:flex-row min-h-[calc(100vh-12rem)] bg-[rgb(17,17,20)] border border-[rgba(163,0,21,0.18)] rounded-md overflow-hidden">
+        <aside className="w-full lg:w-80 border-b lg:border-b-0 lg:border-r border-[rgba(163,0,21,0.15)] flex flex-col bg-black max-h-72 lg:max-h-none">
+          <div className="p-4 border-b border-[rgba(163,0,21,0.15)] flex items-center justify-between">
+            <h2 className="font-heading font-black text-white uppercase text-sm">Conversas</h2>
             <span
               className={`w-2 h-2 rounded-full ${
-                socketReady ? 'bg-green-400' : 'bg-yellow-400'
+                socketReady ? 'bg-[#A30015] shadow-[0_0_10px_rgba(163,0,21,0.8)]' : 'bg-[rgb(120,120,125)]'
               }`}
               title={socketReady ? 'Conectado' : 'Conectando...'}
             />
           </div>
           <div className="flex-1 overflow-y-auto">
             {conversations.length === 0 ? (
-              <div className="p-6 text-center text-gray-400 text-sm">
-                <MessageCircle className="w-8 h-8 mx-auto mb-2 text-gray-500" />
+              <div className="p-6 text-center text-[rgb(161,161,170)] text-sm">
+                <MessageCircle className="w-8 h-8 mx-auto mb-2 text-[#A30015]" />
                 Nenhuma conversa ainda.
               </div>
             ) : (
@@ -170,31 +162,30 @@ function ChatContent() {
                 <button
                   key={c.conversation_id}
                   onClick={() => setActivePeer(c.peer_id)}
-                  className={`w-full text-left p-4 hover:bg-white/5 transition-colors border-b border-white/5 ${
-                    activePeer === c.peer_id ? 'bg-white/5' : ''
+                  className={`w-full text-left p-4 hover:bg-[rgba(163,0,21,0.08)] transition-colors border-b border-[rgba(255,255,255,0.04)] ${
+                    activePeer === c.peer_id ? 'bg-[rgba(163,0,21,0.12)] border-l-2 border-l-[#A30015]' : ''
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-white font-medium">Usuário #{c.peer_id}</span>
+                    <span className="text-white font-bold">Usuário #{c.peer_id}</span>
                     {c.unread_count > 0 && (
-                      <span className="bg-accent text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                      <span className="bg-[#A30015] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-[0_0_8px_rgba(163,0,21,0.7)]">
                         {c.unread_count}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-gray-400 truncate">
+                  <p className="text-xs text-[rgb(161,161,170)] truncate">
                     {c.last_message?.content || 'Sem mensagens'}
                   </p>
                 </button>
               ))
             )}
           </div>
-          {/* Quick start a conversation */}
-          <div className="p-3 border-t border-white/10">
+          <div className="p-3 border-t border-[rgba(163,0,21,0.15)]">
             <input
               type="number"
               placeholder="ID do usuário..."
-              className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-white/10 text-white text-sm placeholder:text-gray-500 focus:outline-none focus:border-primary"
+              className="w-full px-3 py-2 rounded-md bg-[rgb(17,17,20)] border border-[rgba(255,255,255,0.06)] text-white text-sm placeholder:text-[rgb(120,120,125)] focus:outline-none focus:border-[#A30015]"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && e.target.value) {
                   setActivePeer(parseInt(e.target.value, 10));
@@ -205,25 +196,24 @@ function ChatContent() {
           </div>
         </aside>
 
-        {/* Main chat */}
-        <section className="flex-1 flex flex-col">
+        <section className="flex-1 flex flex-col min-h-[28rem]">
           {!activePeer ? (
-            <div className="flex-1 flex items-center justify-center text-gray-400 flex-col gap-3">
-              <MessageCircle className="w-12 h-12 text-gray-500" />
+            <div className="flex-1 flex items-center justify-center text-[rgb(161,161,170)] flex-col gap-3">
+              <MessageCircle className="w-12 h-12 text-[#A30015]" />
               <p>Selecione uma conversa para começar.</p>
             </div>
           ) : (
             <>
-              <header className="p-4 border-b border-white/10">
-                <h3 className="font-heading font-bold text-white">Usuário #{activePeer}</h3>
+              <header className="p-4 border-b border-[rgba(163,0,21,0.15)] bg-black">
+                <h3 className="font-heading font-black text-white uppercase">Usuário #{activePeer}</h3>
                 {peerTyping && (
-                  <p className="text-xs text-primary mt-0.5 animate-pulse">digitando...</p>
+                  <p className="text-xs text-[#A30015] mt-0.5 animate-pulse">digitando...</p>
                 )}
               </header>
 
-              <div className="flex-1 overflow-y-auto p-6 space-y-3">
+              <div className="flex-1 overflow-y-auto p-6 space-y-3 bg-[rgb(17,17,20)]">
                 {messages.length === 0 ? (
-                  <div className="text-center text-gray-400 text-sm mt-12">
+                  <div className="text-center text-[rgb(161,161,170)] text-sm mt-12">
                     Sem mensagens. Envie a primeira.
                   </div>
                 ) : (
@@ -235,10 +225,10 @@ function ChatContent() {
                         className={`flex ${mine ? 'justify-end' : 'justify-start'}`}
                       >
                         <div
-                          className={`max-w-[70%] rounded-2xl px-4 py-2 ${
+                          className={`max-w-[70%] rounded-md px-4 py-2 ${
                             mine
-                              ? 'bg-primary text-white'
-                              : 'bg-white/5 text-white border border-white/10'
+                              ? 'bg-[#A30015] text-white shadow-[0_8px_20px_-8px_rgba(163,0,21,0.7)]'
+                              : 'bg-black text-white border border-[rgba(255,255,255,0.06)]'
                           }`}
                         >
                           <p className="text-sm break-words">{msg.content}</p>
@@ -258,7 +248,7 @@ function ChatContent() {
                 <div ref={messagesEndRef} />
               </div>
 
-              <form onSubmit={sendMessage} className="p-4 border-t border-white/10 flex gap-2">
+              <form onSubmit={sendMessage} className="p-4 border-t border-[rgba(163,0,21,0.15)] flex gap-2 bg-black">
                 <Input
                   value={input}
                   onChange={(e) => {
@@ -281,7 +271,7 @@ function ChatContent() {
 
 export default function ChatPage() {
   return (
-    <Suspense fallback={<div className="container mx-auto px-4 py-12 text-white">Carregando chat...</div>}>
+    <Suspense fallback={<div className="bm-container py-12 text-white">Carregando chat...</div>}>
       <ChatContent />
     </Suspense>
   );

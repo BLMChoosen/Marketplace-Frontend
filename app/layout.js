@@ -4,8 +4,19 @@ import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
 
 export const metadata = {
-  title: 'Marketplace Platform',
-  description: 'A modern, dynamic marketplace built with Next.js and Tailwind CSS',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  title: 'Bloodmoon Marketplace',
+  description: 'Bloodmoon Marketplace — comércio digital com identidade. Sombrio, intenso, sem concessões.',
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
+  openGraph: {
+    title: 'Bloodmoon Marketplace',
+    description: 'Comércio digital com identidade dark, intensa e premium.',
+    images: ['/logo.png'],
+  },
 };
 
 export default function RootLayout({ children }) {

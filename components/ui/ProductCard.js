@@ -11,6 +11,7 @@ export default function ProductCard({ product }) {
   const addItem = useCartStore((s) => s.addItem);
   const title = product.title || product.name;
   const imageUrl = resolveImageUrl(product.image_url);
+  const price = Number(product.price || 0);
 
   const handleAdd = (e) => {
     e.preventDefault();
@@ -19,9 +20,10 @@ export default function ProductCard({ product }) {
   };
 
   return (
-    <div className="group glass-panel rounded-2xl overflow-hidden flex flex-col interactive-hover relative">
-      {/* Product Image */}
-      <div className="relative h-48 overflow-hidden bg-secondary">
+    <article className="group bm-card overflow-hidden flex flex-col interactive-hover relative min-h-full">
+      <Link href={`/products/${product.id}`} className="absolute inset-0 z-0" aria-label={`Ver produto ${title}`} />
+
+      <div className="relative z-10 h-52 overflow-hidden bg-[rgb(20,20,19)] pointer-events-none">
         {imageUrl ? (
           <Image
             src={imageUrl}
@@ -31,42 +33,40 @@ export default function ProductCard({ product }) {
             className="object-cover transition-transform duration-700 group-hover:scale-110"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-secondary">
-            <ImageOff className="w-10 h-10 text-gray-500" />
+          <div className="w-full h-full flex items-center justify-center bg-[rgb(20,20,19)]">
+            <ImageOff className="w-10 h-10 text-[rgb(80,80,85)]" />
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-80 group-hover:opacity-95 transition-opacity duration-300"></div>
 
-        {/* Category Badge */}
-        <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-md border border-white/10 text-white text-xs px-2 py-1 rounded-md font-medium">
+        <div className="absolute top-3 left-3 bg-black/75 backdrop-blur-md border border-[rgba(163,0,21,0.4)] text-[#A30015] text-[10px] uppercase px-2 py-1 rounded font-bold">
           {product.category || 'Geral'}
         </div>
       </div>
 
-      {/* Product Info */}
-      <div className="p-5 flex flex-col flex-grow">
-        <div className="mb-1 text-xs text-gray-400 font-medium tracking-wider uppercase">
+      <div className="relative z-10 p-5 flex flex-col flex-grow border-t border-[rgba(163,0,21,0.12)] pointer-events-none">
+        <div className="mb-2 text-[10px] text-[rgb(161,161,170)] font-semibold uppercase">
           {product.store?.name || 'Loja Parceira'}
         </div>
-        <h3 className="font-heading font-bold text-lg text-white mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+        <h3 className="font-heading font-bold text-lg text-white mb-2 line-clamp-2 group-hover:text-[#A30015] transition-colors">
           {title}
         </h3>
-        <p className="text-gray-400 text-sm line-clamp-2 mb-4 flex-grow">
+        <p className="text-[rgb(161,161,170)] text-sm line-clamp-2 mb-5 flex-grow">
           {product.description}
         </p>
 
-        <div className="flex items-end justify-between mt-auto">
+        <div className="flex items-end justify-between mt-auto pt-3 border-t border-[rgba(255,255,255,0.04)]">
           <div className="flex flex-col">
-            <span className="text-xs text-gray-400 mb-0.5">Preço</span>
-            <span className="font-heading font-bold text-2xl text-white">
-              R$ {parseFloat(product.price).toFixed(2)}
+            <span className="text-[10px] text-[rgb(161,161,170)] mb-0.5 uppercase">Preço</span>
+            <span className="font-heading font-black text-2xl text-white">
+              R$ {price.toFixed(2)}
             </span>
           </div>
 
           <Button
             variant="primary"
             size="sm"
-            className="!p-2 rounded-xl group/btn relative z-10"
+            className="!p-2.5 rounded-md group/btn relative z-20 pointer-events-auto"
             onClick={handleAdd}
             aria-label="Adicionar ao Carrinho"
           >
@@ -74,11 +74,6 @@ export default function ProductCard({ product }) {
           </Button>
         </div>
       </div>
-
-      {/* Clickable Overlay */}
-      <Link href={`/products/${product.id}`} className="absolute inset-0 z-0">
-        <span className="sr-only">Ver produto {title}</span>
-      </Link>
-    </div>
+    </article>
   );
 }

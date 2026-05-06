@@ -33,6 +33,12 @@ function statusLabel(status) {
   return labels[status] || status;
 }
 
+const TEXTAREA_CLASSES =
+  'bm-field min-h-24 px-4 py-3';
+
+const SELECT_CLASSES =
+  'bm-field px-4 py-3';
+
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -124,18 +130,21 @@ export default function Dashboard() {
   const isSeller = user.role === 'seller';
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="bm-page bm-container py-16">
       <div className="mb-10">
-        <h1 className="text-3xl md:text-4xl font-bold font-heading text-white mb-2">
+        <div className="bm-kicker mb-3">
+          Painel {isSeller ? 'do vendedor' : 'do comprador'}
+        </div>
+        <h1 className="text-4xl md:text-5xl font-black font-heading text-white mb-2">
           Olá, {user.name}
         </h1>
-        <p className="text-gray-400">
-          Painel {isSeller ? 'do vendedor' : 'do comprador'} conectado aos dados reais da API.
+        <p className="text-[rgb(161,161,170)]">
+          Comando central da sua presença na lua de sangue.
         </p>
       </div>
 
       {error && (
-        <div className="mb-8 p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+        <div className="mb-8 p-4 bm-danger text-sm">
           {error}
         </div>
       )}
@@ -144,18 +153,18 @@ export default function Dashboard() {
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             {[
-              { label: 'Receita Total', value: money(sellerStats.total_revenue), icon: DollarSign, color: 'text-green-400', bg: 'bg-green-400/10' },
-              { label: 'Pedidos Hoje', value: sellerStats.orders_today, icon: Package, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-              { label: 'Pedidos Pendentes', value: sellerStats.pending_orders, icon: Truck, color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
-              { label: 'Produtos Ativos', value: sellerStats.products_count, icon: Store, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+              { label: 'Receita total', value: money(sellerStats.total_revenue), icon: DollarSign },
+              { label: 'Pedidos hoje', value: sellerStats.orders_today, icon: Package },
+              { label: 'Pendentes', value: sellerStats.pending_orders, icon: Truck },
+              { label: 'Produtos ativos', value: sellerStats.products_count, icon: Store },
             ].map((stat) => (
-              <div key={stat.label} className="glass-panel p-6 rounded-2xl flex items-center gap-4">
-                <div className={`p-4 rounded-xl ${stat.bg} ${stat.color}`}>
-                  <stat.icon className="w-8 h-8" />
+              <div key={stat.label} className="bm-card p-6 flex items-center gap-4">
+                <div className="bm-icon-frame p-3">
+                  <stat.icon className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400 font-medium">{stat.label}</p>
-                  <p className="text-2xl font-bold text-white mt-1">{stat.value}</p>
+                  <p className="text-[10px] uppercase text-[rgb(161,161,170)] font-bold">{stat.label}</p>
+                  <p className="text-2xl font-black text-white mt-1">{stat.value}</p>
                 </div>
               </div>
             ))}
@@ -163,27 +172,27 @@ export default function Dashboard() {
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
             <section className="xl:col-span-2 space-y-8">
-              <div className="glass-panel p-8 rounded-2xl">
-                <h2 className="text-xl font-bold text-white mb-6">Últimos Pedidos</h2>
+              <div className="bm-card p-8">
+                <h2 className="text-xl font-black font-heading text-white mb-6 uppercase">Últimos pedidos</h2>
                 {loading ? (
-                  <p className="text-gray-400">Carregando pedidos...</p>
+                  <p className="text-[rgb(161,161,170)]">Carregando pedidos...</p>
                 ) : sellerOrders.length === 0 ? (
-                  <p className="text-gray-400">Nenhum pedido para suas lojas ainda.</p>
+                  <p className="text-[rgb(161,161,170)]">Nenhum pedido para suas lojas ainda.</p>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {sellerOrders.map((order) => (
-                      <div key={order.id} className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 rounded-xl bg-white/5 border border-white/5">
+                      <div key={order.id} className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 rounded-md bg-black border border-[rgba(255,255,255,0.04)]">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center">
-                            <Package className="w-6 h-6 text-gray-400" />
+                          <div className="w-12 h-12 rounded-md bg-[rgb(20,20,19)] flex items-center justify-center border border-[rgba(163,0,21,0.25)]">
+                            <Package className="w-6 h-6 text-[#A30015]" />
                           </div>
                           <div>
-                            <p className="text-white font-medium">Pedido #{order.id}</p>
-                            <p className="text-sm text-gray-400">{statusLabel(order.status)} • {order.items?.length || 0} itens</p>
+                            <p className="text-white font-bold">Pedido #{order.id}</p>
+                            <p className="text-sm text-[rgb(161,161,170)]">{statusLabel(order.status)} • {order.items?.length || 0} itens</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3 md:justify-end">
-                          <p className="text-white font-bold">{money(order.total_amount)}</p>
+                          <p className="text-white font-black">{money(order.total_amount)}</p>
                           {order.status === 'paid' && (
                             <Button variant="secondary" size="sm" onClick={() => shipOrder(order.id)}>
                               Enviar
@@ -201,16 +210,16 @@ export default function Dashboard() {
                 )}
               </div>
 
-              <div className="glass-panel p-8 rounded-2xl">
-                <h2 className="text-xl font-bold text-white mb-6">Produtos Cadastrados</h2>
+              <div className="bm-card p-8">
+                <h2 className="text-xl font-black font-heading text-white mb-6 uppercase">Produtos cadastrados</h2>
                 {sellerProducts.length === 0 ? (
-                  <p className="text-gray-400">Nenhum produto publicado ainda.</p>
+                  <p className="text-[rgb(161,161,170)]">Nenhum produto publicado ainda.</p>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {sellerProducts.slice(0, 8).map((product) => (
-                      <div key={product.id} className="p-4 rounded-xl bg-white/5 border border-white/5">
+                      <div key={product.id} className="p-4 rounded-md bg-black border border-[rgba(255,255,255,0.04)] hover:border-[rgba(163,0,21,0.4)] transition-colors">
                         <p className="text-white font-medium truncate">{product.title}</p>
-                        <p className="text-sm text-gray-400">{money(product.price)} • estoque {product.stock}</p>
+                        <p className="text-sm text-[rgb(161,161,170)]">{money(product.price)} • estoque {product.stock}</p>
                       </div>
                     ))}
                   </div>
@@ -219,32 +228,32 @@ export default function Dashboard() {
             </section>
 
             <aside className="space-y-8">
-              <form onSubmit={handleStoreSubmit} className="glass-panel p-6 rounded-2xl space-y-4">
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                  <Store className="w-5 h-5" />
-                  Nova Loja
+              <form onSubmit={handleStoreSubmit} className="bm-panel p-6 space-y-4">
+                <h2 className="text-lg font-black font-heading text-white flex items-center gap-2 uppercase">
+                  <Store className="w-5 h-5 text-[#A30015]" />
+                  Nova loja
                 </h2>
                 <Input label="Nome" value={storeForm.name} onChange={(e) => setStoreForm({ ...storeForm, name: e.target.value })} required />
                 <Input label="Logo URL" value={storeForm.logo_url} onChange={(e) => setStoreForm({ ...storeForm, logo_url: e.target.value })} />
                 <textarea
-                  className="w-full min-h-24 px-4 py-3 rounded-lg bg-secondary/50 border border-white/10 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className={TEXTAREA_CLASSES}
                   placeholder="Descrição"
                   value={storeForm.description}
                   onChange={(e) => setStoreForm({ ...storeForm, description: e.target.value })}
                 />
                 <Button type="submit" variant="primary" className="w-full" isLoading={submitting}>
                   <Plus className="w-4 h-4" />
-                  Criar Loja
+                  Criar loja
                 </Button>
               </form>
 
-              <form onSubmit={handleProductSubmit} className="glass-panel p-6 rounded-2xl space-y-4">
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                  <Package className="w-5 h-5" />
-                  Novo Produto
+              <form onSubmit={handleProductSubmit} className="bm-panel p-6 space-y-4">
+                <h2 className="text-lg font-black font-heading text-white flex items-center gap-2 uppercase">
+                  <Package className="w-5 h-5 text-[#A30015]" />
+                  Novo produto
                 </h2>
                 <select
-                  className="w-full px-4 py-3 rounded-lg bg-secondary/50 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className={SELECT_CLASSES}
                   value={productForm.store_id}
                   onChange={(e) => setProductForm({ ...productForm, store_id: e.target.value })}
                   required
@@ -262,45 +271,45 @@ export default function Dashboard() {
                 <Input label="Categoria" value={productForm.category} onChange={(e) => setProductForm({ ...productForm, category: e.target.value })} />
                 <Input label="Imagem URL" value={productForm.image_url} onChange={(e) => setProductForm({ ...productForm, image_url: e.target.value })} />
                 <textarea
-                  className="w-full min-h-28 px-4 py-3 rounded-lg bg-secondary/50 border border-white/10 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className={TEXTAREA_CLASSES}
                   placeholder="Descrição"
                   value={productForm.description}
                   onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
                 />
-                {formError && <p className="text-sm text-red-400">{formError}</p>}
-                <Button type="submit" variant="accent" className="w-full" isLoading={submitting} disabled={sellerStores.length === 0}>
-                  Publicar Produto
+                {formError && <p className="text-sm text-[#A30015]">{formError}</p>}
+                <Button type="submit" variant="primary" className="w-full" isLoading={submitting} disabled={sellerStores.length === 0}>
+                  Publicar produto
                 </Button>
               </form>
             </aside>
           </div>
         </>
       ) : (
-        <div className="glass-panel p-8 rounded-2xl">
-          <h2 className="text-xl font-bold text-white mb-6">Seus Pedidos Recentes</h2>
+        <div className="bm-card p-8">
+          <h2 className="text-xl font-black font-heading text-white mb-6 uppercase">Seus pedidos</h2>
           {loading ? (
-            <p className="text-gray-400">Carregando pedidos...</p>
+            <p className="text-[rgb(161,161,170)]">Carregando pedidos...</p>
           ) : buyerOrders.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-white/10 rounded-xl">
-              <Package className="w-12 h-12 text-gray-500 mb-3" />
+            <div className="flex flex-col items-center justify-center py-12 text-center border border-dashed border-[rgba(255,255,255,0.1)] rounded-md">
+              <Package className="w-12 h-12 text-[#A30015] mb-3" />
               <p className="text-lg text-white font-medium mb-1">Nenhum pedido encontrado</p>
-              <p className="text-gray-400 mb-6">Parece que você ainda não fez nenhuma compra.</p>
+              <p className="text-[rgb(161,161,170)] mb-6">Você ainda não fez nenhuma compra.</p>
               <Button variant="primary" onClick={() => router.push('/products')}>
-                Explorar Produtos
+                Explorar produtos
               </Button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {buyerOrders.map((order) => (
-                <div key={order.id} className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5">
+                <div key={order.id} className="flex items-center justify-between p-4 rounded-md bg-black border border-[rgba(255,255,255,0.04)] hover:border-[rgba(163,0,21,0.4)] transition-colors">
                   <div className="flex items-center gap-4">
-                    <CheckCircle2 className="w-6 h-6 text-primary" />
+                    <CheckCircle2 className="w-6 h-6 text-[#A30015]" />
                     <div>
-                      <p className="text-white font-medium">Pedido #{order.id}</p>
-                      <p className="text-sm text-gray-400">{statusLabel(order.status)}</p>
+                      <p className="text-white font-bold">Pedido #{order.id}</p>
+                      <p className="text-sm text-[rgb(161,161,170)]">{statusLabel(order.status)}</p>
                     </div>
                   </div>
-                  <p className="text-white font-bold">{money(order.total_amount)}</p>
+                  <p className="text-white font-black">{money(order.total_amount)}</p>
                 </div>
               ))}
             </div>

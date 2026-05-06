@@ -1,100 +1,177 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useState } from 'react';
+import { Menu, X, ShoppingCart, User, LogOut, Package, MessageCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import useCartStore from '../../lib/cartStore';
-import { ShoppingCart, User, LogOut, Package, MessageCircle } from 'lucide-react';
+import BrandMark from './BrandMark';
 import Button from './Button';
+
+const navLinks = [
+  { href: '/products', label: 'Produtos' },
+  { href: '/stores', label: 'Lojas' },
+];
 
 export default function Navbar() {
   const { user, logout, loading } = useAuth();
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
   const cartCount = useCartStore((s) =>
     s.items.reduce((sum, item) => sum + item.quantity, 0)
   );
 
-  return (
-    <header className="sticky top-0 z-50 w-full glass border-b-0 border-white/5">
-      <div className="container mx-auto px-4 h-20 flex items-center justify-between">
+  const isActive = (href) =>
+    pathname === href || (href !== '/' && pathname?.startsWith(`${href}/`));
 
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-accent flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-all">
-            M
+  const handleLogout = () => {
+    setOpen(false);
+    logout();
+  };
+
+  const linkClass = (href) =>
+    `text-sm font-semibold transition-colors ${
+      isActive(href)
+        ? 'text-white'
+        : 'text-[rgb(161,161,170)] hover:text-white'
+    }`;
+
+  const cartBadge = cartCount > 0 && (
+    <span className="absolute -top-2 -right-2 bg-[#A30015] text-white text-[10px] font-bold min-w-4 h-4 px-1 rounded-full flex items-center justify-center shadow-[0_0_12px_rgba(163,0,21,0.8)]">
+      {cartCount > 99 ? '99+' : cartCount}
+    </span>
+  );
+
+  return (
+    <header className="sticky top-0 z-50 w-full bg-black/90 backdrop-blur-xl border-b border-[rgba(163,0,21,0.22)]">
+      <div className="bm-container h-18 flex items-center justify-between gap-4">
+        <Link href="/" className="flex items-center gap-3 group shrink-0" onClick={() => setOpen(false)}>
+          <BrandMark alt="" priority className="group-hover:shadow-[0_0_28px_-4px_rgba(163,0,21,0.9)] transition-all" />
+          <div className="flex flex-col leading-none">
+            <span className="font-heading font-black text-xl text-white">
+              Bloodmoon
+            </span>
+            <span className="font-sans text-[10px] uppercase text-[#A30015] mt-1">
+              Marketplace
+            </span>
           </div>
-          <span className="font-heading font-bold text-2xl tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-gray-400 transition-all">
-            Marketplace
-          </span>
         </Link>
 
-        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-8">
-          <Link href="/products" className="text-gray-300 hover:text-white transition-colors font-medium">
-            Produtos
-          </Link>
-          <Link href="/stores" className="text-gray-300 hover:text-white transition-colors font-medium">
-            Lojas
-          </Link>
+          {navLinks.map((link) => (
+            <Link key={link.href} href={link.href} className={linkClass(link.href)}>
+              {link.label}
+            </Link>
+          ))}
 
-          <div className="h-6 w-px bg-white/10 mx-2"></div>
+          <div className="h-6 w-px bg-[rgba(163,0,21,0.4)] mx-1" />
 
           {!loading && (
-            <>
-              {user ? (
-                <div className="flex items-center gap-4">
-                  <Link href="/chat" className="text-gray-300 hover:text-white transition-colors" aria-label="Mensagens">
-                    <MessageCircle className="w-6 h-6" />
+            user ? (
+              <div className="flex items-center gap-4">
+                <Link href="/chat" className="text-[rgb(161,161,170)] hover:text-[#A30015] transition-colors" aria-label="Mensagens">
+                  <MessageCircle className="w-5 h-5" />
+                </Link>
+
+                {user.role === 'buyer' && (
+                  <Link href="/cart" className="text-[rgb(161,161,170)] hover:text-[#A30015] transition-colors relative" aria-label="Carrinho">
+                    <ShoppingCart className="w-5 h-5" />
+                    {cartBadge}
                   </Link>
-                  {user.role === 'buyer' && (
-                    <Link href="/cart" className="text-gray-300 hover:text-white transition-colors relative">
-                      <ShoppingCart className="w-6 h-6" />
-                      {cartCount > 0 && (
-                        <span className="absolute -top-2 -right-2 bg-accent text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                          {cartCount > 99 ? '99+' : cartCount}
-                        </span>
-                      )}
-                    </Link>
-                  )}
+                )}
 
-                  <div className="relative group ml-4 cursor-pointer">
-                    <div className="flex items-center gap-2">
-                      <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center border border-white/10 overflow-hidden">
-                        <User className="w-5 h-5 text-gray-400" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-semibold text-white leading-tight">{user.name}</span>
-                        <span className="text-[10px] text-primary uppercase tracking-wider">{user.role}</span>
-                      </div>
-                    </div>
+                <div className="relative group ml-2">
+                  <button className="flex items-center gap-3 rounded-md p-1.5 hover:bg-[rgba(163,0,21,0.08)] transition-colors" type="button">
+                    <span className="w-9 h-9 rounded-md bg-[rgb(17,17,20)] flex items-center justify-center border border-[rgba(163,0,21,0.3)] overflow-hidden">
+                      <User className="w-5 h-5 text-[rgb(161,161,170)]" />
+                    </span>
+                    <span className="flex flex-col text-left">
+                      <span className="text-sm font-semibold text-white leading-tight max-w-32 truncate">{user.name}</span>
+                      <span className="text-[10px] text-[#A30015] uppercase font-bold">{user.role}</span>
+                    </span>
+                  </button>
 
-                    {/* Dropdown menu */}
-                    <div className="absolute right-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-right group-hover:translate-y-0 translate-y-2">
-                      <div className="glass-panel rounded-xl p-2 w-48 flex flex-col gap-1">
-                        <Link href="/dashboard" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/5 text-gray-300 hover:text-white transition-colors text-sm">
-                          <Package className="w-4 h-4" />
-                          Dashboard
-                        </Link>
-                        <button onClick={logout} className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-red-500/10 text-red-400 hover:text-red-300 transition-colors text-sm w-full text-left">
-                          <LogOut className="w-4 h-4" />
-                          Sair
-                        </button>
-                      </div>
+                  <div className="absolute right-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 origin-top-right translate-y-2 group-hover:translate-y-0">
+                    <div className="bg-[rgb(17,17,20)] border border-[rgba(163,0,21,0.25)] rounded-md p-2 w-52 flex flex-col gap-1 shadow-[0_20px_50px_-20px_rgba(163,0,21,0.4)]">
+                      <Link href="/dashboard" className="flex items-center gap-2 px-3 py-2 rounded hover:bg-[rgba(163,0,21,0.12)] text-[rgb(161,161,170)] hover:text-white transition-colors text-sm">
+                        <Package className="w-4 h-4" />
+                        Dashboard
+                      </Link>
+                      <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-2 rounded hover:bg-[rgba(163,0,21,0.18)] text-[#A30015] hover:text-white transition-colors text-sm w-full text-left" type="button">
+                        <LogOut className="w-4 h-4" />
+                        Sair
+                      </button>
                     </div>
                   </div>
                 </div>
-              ) : (
-                <div className="flex items-center gap-3">
-                  <Link href="/login">
-                    <Button variant="ghost" size="sm">Entrar</Button>
-                  </Link>
-                  <Link href="/register">
-                    <Button variant="primary" size="sm">Cadastrar</Button>
-                  </Link>
-                </div>
-              )}
-            </>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <Link href="/login">
+                  <Button variant="ghost" size="sm">Entrar</Button>
+                </Link>
+                <Link href="/register">
+                  <Button variant="primary" size="sm">Cadastrar</Button>
+                </Link>
+              </div>
+            )
           )}
         </nav>
+
+        <button
+          type="button"
+          className="md:hidden w-10 h-10 rounded-md border border-[rgba(163,0,21,0.35)] bg-[rgb(17,17,20)] text-white flex items-center justify-center"
+          aria-label={open ? 'Fechar menu' : 'Abrir menu'}
+          aria-expanded={open}
+          onClick={() => setOpen((value) => !value)}
+        >
+          {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
       </div>
+
+      {open && (
+        <div className="md:hidden border-t border-[rgba(163,0,21,0.18)] bg-black">
+          <nav className="bm-container py-4 flex flex-col gap-2">
+            {navLinks.map((link) => (
+              <Link key={link.href} href={link.href} className="px-3 py-3 rounded-md text-white bg-[rgb(17,17,20)] border border-[rgba(255,255,255,0.05)]" onClick={() => setOpen(false)}>
+                {link.label}
+              </Link>
+            ))}
+
+            {!loading && (
+              user ? (
+                <>
+                  <Link href="/dashboard" className="px-3 py-3 rounded-md text-white bg-[rgb(17,17,20)] border border-[rgba(255,255,255,0.05)]" onClick={() => setOpen(false)}>
+                    Dashboard
+                  </Link>
+                  <Link href="/chat" className="px-3 py-3 rounded-md text-white bg-[rgb(17,17,20)] border border-[rgba(255,255,255,0.05)]" onClick={() => setOpen(false)}>
+                    Mensagens
+                  </Link>
+                  {user.role === 'buyer' && (
+                    <Link href="/cart" className="px-3 py-3 rounded-md text-white bg-[rgb(17,17,20)] border border-[rgba(255,255,255,0.05)] flex items-center justify-between" onClick={() => setOpen(false)}>
+                      Carrinho
+                      {cartCount > 0 && <span className="bg-[#A30015] text-white text-xs font-bold px-2 py-0.5 rounded-full">{cartCount > 99 ? '99+' : cartCount}</span>}
+                    </Link>
+                  )}
+                  <button onClick={handleLogout} className="px-3 py-3 rounded-md text-left text-[#A30015] bg-[rgba(163,0,21,0.08)] border border-[rgba(163,0,21,0.25)]" type="button">
+                    Sair
+                  </button>
+                </>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                  <Link href="/login" onClick={() => setOpen(false)}>
+                    <Button variant="ghost" className="w-full">Entrar</Button>
+                  </Link>
+                  <Link href="/register" onClick={() => setOpen(false)}>
+                    <Button variant="primary" className="w-full">Cadastrar</Button>
+                  </Link>
+                </div>
+              )
+            )}
+          </nav>
+        </div>
+      )}
     </header>
   );
 }
