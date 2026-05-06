@@ -1,0 +1,29 @@
+{
+  "name": "marketplace-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -H 0.0.0.0 -p 3000",
+    "build": "next build",
+    "start": "next start -H 0.0.0.0 -p 3000",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@stripe/react-stripe-js": "^3.7.0",
+    "@stripe/stripe-js": "^5.8.0",
+    "axios": "^1.15.2",
+    "lucide-react": "^1.14.0",
+    "next": "16.2.4",
+    "react": "19.2.5",
+    "react-dom": "19.2.5",
+    "socket.io-client": "^4.8.1",
+    "zustand": "^5.0.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.1.5",
+    "eslint": "9.24.0",
+    "eslint-config-next": "16.2.4",
+    "postcss": "8.5.3",
+    "tailwindcss": "4.1.5"
+  }
+}
