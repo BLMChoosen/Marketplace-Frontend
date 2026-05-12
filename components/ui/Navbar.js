@@ -36,8 +36,11 @@ export default function Navbar() {
         : 'text-[rgb(161,161,170)] hover:text-white'
     }`;
 
-  const cartBadge = cartCount > 0 && (
-    <span className="absolute -top-2 -right-2 bg-[#A30015] text-white text-[10px] font-bold min-w-4 h-4 px-1 rounded-full flex items-center justify-center shadow-[0_0_12px_rgba(163,0,21,0.8)]">
+  const cartLabel = `Carrinho com ${cartCount} ${cartCount === 1 ? 'item' : 'itens'}`;
+  const cartBadge = (
+    <span className={`absolute -top-2 -right-2 text-white text-[10px] font-bold min-w-4 h-4 px-1 rounded-full flex items-center justify-center shadow-[0_0_12px_rgba(163,0,21,0.8)] ${
+      cartCount > 0 ? 'bg-[#A30015]' : 'bg-[rgb(63,63,70)]'
+    }`}>
       {cartCount > 99 ? '99+' : cartCount}
     </span>
   );
@@ -68,19 +71,22 @@ export default function Navbar() {
 
           <div className="h-6 w-px bg-[rgba(163,0,21,0.4)] mx-1" />
 
+          <Link
+            href="/cart"
+            className="text-[rgb(161,161,170)] hover:text-[#A30015] transition-colors relative"
+            aria-label={cartLabel}
+            title={cartLabel}
+          >
+            <ShoppingCart className="w-5 h-5" />
+            {cartBadge}
+          </Link>
+
           {!loading && (
             user ? (
               <div className="flex items-center gap-4">
                 <Link href="/chat" className="text-[rgb(161,161,170)] hover:text-[#A30015] transition-colors" aria-label="Mensagens">
                   <MessageCircle className="w-5 h-5" />
                 </Link>
-
-                {user.role === 'buyer' && (
-                  <Link href="/cart" className="text-[rgb(161,161,170)] hover:text-[#A30015] transition-colors relative" aria-label="Carrinho">
-                    <ShoppingCart className="w-5 h-5" />
-                    {cartBadge}
-                  </Link>
-                )}
 
                 <div className="relative group ml-2">
                   <button className="flex items-center gap-3 rounded-md p-1.5 hover:bg-[rgba(163,0,21,0.08)] transition-colors" type="button">
@@ -140,6 +146,16 @@ export default function Navbar() {
               </Link>
             ))}
 
+            <Link href="/cart" className="px-3 py-3 rounded-md text-white bg-[rgb(17,17,20)] border border-[rgba(255,255,255,0.05)] flex items-center justify-between" onClick={() => setOpen(false)}>
+              <span className="flex items-center gap-2">
+                <ShoppingCart className="w-4 h-4 text-[#A30015]" />
+                Carrinho
+              </span>
+              <span className={`${cartCount > 0 ? 'bg-[#A30015]' : 'bg-[rgb(63,63,70)]'} text-white text-xs font-bold px-2 py-0.5 rounded-full`}>
+                {cartCount > 99 ? '99+' : cartCount}
+              </span>
+            </Link>
+
             {!loading && (
               user ? (
                 <>
@@ -149,12 +165,6 @@ export default function Navbar() {
                   <Link href="/chat" className="px-3 py-3 rounded-md text-white bg-[rgb(17,17,20)] border border-[rgba(255,255,255,0.05)]" onClick={() => setOpen(false)}>
                     Mensagens
                   </Link>
-                  {user.role === 'buyer' && (
-                    <Link href="/cart" className="px-3 py-3 rounded-md text-white bg-[rgb(17,17,20)] border border-[rgba(255,255,255,0.05)] flex items-center justify-between" onClick={() => setOpen(false)}>
-                      Carrinho
-                      {cartCount > 0 && <span className="bg-[#A30015] text-white text-xs font-bold px-2 py-0.5 rounded-full">{cartCount > 99 ? '99+' : cartCount}</span>}
-                    </Link>
-                  )}
                   <button onClick={handleLogout} className="px-3 py-3 rounded-md text-left text-[#A30015] bg-[rgba(163,0,21,0.08)] border border-[rgba(163,0,21,0.25)]" type="button">
                     Sair
                   </button>

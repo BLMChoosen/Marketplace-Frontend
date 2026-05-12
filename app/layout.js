@@ -2,6 +2,7 @@ import './globals.css';
 import { AuthProvider } from '../context/AuthContext';
 import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
+import CartAddedPopup from '../components/ui/CartAddedPopup';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 const socialImage = siteUrl ? { images: ['/logo.png'] } : {};
@@ -32,6 +33,7 @@ export default function RootLayout({ children }) {
             {children}
           </main>
           <Footer />
+          <CartAddedPopup />
         </AuthProvider>
       </body>
     </html>

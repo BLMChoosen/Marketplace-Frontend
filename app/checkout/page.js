@@ -13,11 +13,33 @@ import { ShieldCheck, Lock } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import api from '../../lib/api';
 
-function PaymentForm({ order }) {
+const formatMoney = (amount, currency = 'brl') =>
+  new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: currency.toUpperCase(),
+  }).format(amount);
+
+const formatOrderAmount = (amount, currency = 'brl') =>
+  formatMoney(Number.parseFloat(amount || 0), currency);
+
+const formatStripeAmount = (paymentIntent, fallbackAmount, fallbackCurrency = 'brl') => {
+  const currency = paymentIntent?.currency || fallbackCurrency;
+  if (Number.isFinite(paymentIntent?.amount)) {
+    return formatMoney(paymentIntent.amount / 100, currency);
+  }
+  return formatOrderAmount(fallbackAmount, currency);
+};
+
+const isDevPaymentBypassEnabled =
+  process.env.NEXT_PUBLIC_DEV_PAYMENT_BYPASS === 'true';
+
+function PaymentForm({ order, paymentIntent }) {
   const stripe = useStripe();
   const elements = useElements();
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const stripeTotal = formatStripeAmount(paymentIntent, order.total_amount);
+  const hasStripeTotal = Number.isFinite(paymentIntent?.amount);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,13 +63,21 @@ function PaymentForm({ order }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="p-4 rounded-md border border-[rgba(255,255,255,0.06)] bg-black">
+      <div className="rounded-md border border-[rgba(255,255,255,0.06)] bg-black overflow-hidden">
+        <div className="px-4 py-3 border-b border-[rgba(255,255,255,0.06)] bg-[rgb(17,17,20)] flex items-center justify-between gap-4">
+          <span className="text-[10px] uppercase font-bold tracking-wide text-[rgb(161,161,170)]">
+            {hasStripeTotal ? 'Total informado pela Stripe' : 'Total do pedido'}
+          </span>
+          <span className="text-white font-black text-lg shrink-0">{stripeTotal}</span>
+        </div>
+        <div className="p-4">
         <PaymentElement
           options={{
             layout: 'tabs',
             fields: { billingDetails: { address: { country: 'never' } } },
           }}
         />
+        </div>
       </div>
 
       {errorMsg && (
@@ -65,7 +95,7 @@ function PaymentForm({ order }) {
         disabled={!stripe || !elements}
       >
         <Lock className="w-4 h-4" />
-        Pagar R$ {parseFloat(order.total_amount).toFixed(2)}
+        Pagar {stripeTotal}
       </Button>
 
       <p className="text-[10px] text-[rgb(120,120,125)] text-center flex items-center justify-center gap-1 uppercase">
@@ -85,6 +115,8 @@ function CheckoutInner() {
   const [stripePromise, setStripePromise] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
+  const [devPaying, setDevPaying] = useState(false);
+  const [devPaymentError, setDevPaymentError] = useState('');
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -130,7 +162,29 @@ function CheckoutInner() {
     );
   }
 
-  const { client_secret, order } = checkoutData;
+  const { client_secret, order, payment_intent } = checkoutData;
+  const orderTotal = formatOrderAmount(order.total_amount);
+  const stripeTotal = formatStripeAmount(payment_intent, order.total_amount);
+
+  const handleDevPayNow = async () => {
+    setDevPaying(true);
+    setDevPaymentError('');
+
+    try {
+      const res = await api.post(`/payments/dev/mark-paid/${order.id}`);
+      sessionStorage.setItem('checkout_data', JSON.stringify({
+        ...checkoutData,
+        order: res.data.order,
+      }));
+      router.push(`/checkout/success?order_id=${order.id}`);
+    } catch (err) {
+      setDevPaymentError(
+        err.response?.data?.error || 'Falha ao confirmar pagamento de desenvolvimento'
+      );
+    } finally {
+      setDevPaying(false);
+    }
+  };
 
   const elementsOptions = {
     clientSecret: client_secret,
@@ -170,7 +224,7 @@ function CheckoutInner() {
             ))}
             <div className="border-t border-[rgba(255,255,255,0.06)] pt-4 flex justify-between text-white font-black text-lg">
               <span className="uppercase">Total</span>
-              <span className="text-[#A30015]">R$ {parseFloat(order.total_amount).toFixed(2)}</span>
+              <span className="text-[#A30015]">{orderTotal}</span>
             </div>
             {order.shipping_address && (
               <div className="text-xs text-[rgb(161,161,170)] pt-2 border-t border-[rgba(255,255,255,0.06)]">
@@ -196,8 +250,38 @@ function CheckoutInner() {
           <h2 className="text-xs uppercase font-bold text-[rgb(161,161,170)] mb-4">Pagamento</h2>
           <div className="bm-panel p-6">
             <Elements stripe={stripePromise} options={elementsOptions}>
-              <PaymentForm order={order} />
+              <PaymentForm order={order} paymentIntent={payment_intent} />
             </Elements>
+            <div className="mt-4 pt-4 border-t border-[rgba(255,255,255,0.06)] flex items-center justify-between text-xs">
+              <span className="uppercase font-bold text-[rgb(120,120,125)]">Valor da cobrança</span>
+              <span className="font-black text-white">{stripeTotal}</span>
+            </div>
+            {isDevPaymentBypassEnabled && (
+              <div className="mt-4 pt-4 border-t border-[rgba(255,255,255,0.06)]">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <span className="text-[10px] uppercase font-bold text-[#A30015]">
+                    Desenvolvimento
+                  </span>
+                  <span className="text-[10px] uppercase font-bold text-[rgb(120,120,125)]">
+                    Bypass Stripe
+                  </span>
+                </div>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleDevPayNow}
+                  isLoading={devPaying}
+                  disabled={order.status !== 'pending'}
+                >
+                  Pagar agora
+                </Button>
+                {devPaymentError && (
+                  <div className="mt-3 p-3 bm-danger text-sm">
+                    {devPaymentError}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

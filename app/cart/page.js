@@ -45,6 +45,7 @@ export default function CartPage() {
       });
       sessionStorage.setItem('checkout_data', JSON.stringify({
         client_secret: res.data.client_secret,
+        payment_intent: res.data.payment_intent,
         publishable_key: res.data.publishable_key,
         order: res.data.order,
       }));
